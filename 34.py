@@ -1,137 +1,123 @@
 
 import os
 
-FAILINIMI = "hinded.txt"
+algandmed = {
+    "Mari": [5, 4, 5, 3],
+    "Jüri": [3, 4],
+    "Anna": [5, 5, 4, 5, 5],
+    "Peeter": [2, 3, 3],
+    "Kati": [4, 5, 5, 4, 5, 5],
+    "Martin": [3, 4, 4]
+}
+
+if not os.path.exists("hinded.txt"):
+    with open("hinded.txt", "w", encoding="utf-8") as fail:
+        for nimi, hinded in algandmed.items():
+            fail.write(nimi + " " +
+                       " ".join(map(str, hinded)) + "\n")
 
 
-# Loeme õpilased failist
 def loe_andmed():
-    opilased = []
+    opilased = {}
 
-    if os.path.exists(FAILINIMI):
-        with open(FAILINIMI, "r", encoding="utf-8") as fail:
-            for rida in fail:
-                osad = rida.strip().split(";")
-
-                if len(osad) == 2:
-                    nimi = osad[0]
-                    hinne = int(osad[1])
-                    opilased.append((nimi, hinne))
+    with open("hinded.txt", "r", encoding="utf-8") as fail:
+        for rida in fail:
+            osad = rida.split()
+            if len(osad) > 1:
+                nimi = osad[0]
+                hinded = [int(x) for x in osad[1:]]
+                opilased[nimi] = hinded
 
     return opilased
 
 
-# Salvestame õpilased faili
 def salvesta_andmed(opilased):
-    with open(FAILINIMI, "w", encoding="utf-8") as fail:
-        for nimi, hinne in opilased:
-            fail.write(f"{nimi};{hinne}\n")
+    with open("hinded.txt", "w", encoding="utf-8") as fail:
+        for nimi, hinded in opilased.items():
+            fail.write(nimi + " " +
+                       " ".join(map(str, hinded)) + "\n")
 
 
-# 1. Kuvame kõik õpilased
 def kuva_opilased(opilased):
-    if not opilased:
-        print("Õpilasi veel ei ole.")
-    else:
-        print("\nÕPILASTE NIMEKIRI")
-        print("------------------")
-
-        for nimi, hinne in opilased:
-            print(f"{nimi}: hinne {hinne}")
+    for nimi, hinded in opilased.items():
+        print(nimi, "Hinded:", hinded)
 
 
-# 2. Lisame uue õpilase
 def lisa_opilane(opilased):
-    nimi = input("Sisesta õpilase nimi: ").strip()
+    nimi = input("Sisesta õpilase nimi: ")
 
     try:
         hinne = int(input("Sisesta hinne (1-5): "))
 
-        if not nimi:
-            print("Nimi ei tohi olla tühi.")
-        elif hinne < 1 or hinne > 5:
-            print("Hinne peab olema vahemikus 1-5.")
+        if hinne < 1 or hinne > 5:
+            print("Hinne peab olema 1 kuni 5!")
+            return
+
+        if nimi in opilased:
+            opilased[nimi].append(hinne)
         else:
-            opilased.append((nimi, hinne))
-            salvesta_andmed(opilased)
-            print("Õpilane lisati edukalt!")
+            opilased[nimi] = [hinne]
+
+        salvesta_andmed(opilased)
+        print("Hinne lisatud!")
 
     except ValueError:
-        print("Palun sisesta korrektne täisarv!")
+        print("Palun sisesta õige hinne!")
 
 
-# 3. Otsime õpilast
 def otsi_opilast(opilased):
-    nimi = input("Sisesta otsitava õpilase nimi: ").strip()
+    nimi = input("Keda otsid? ")
 
-    leitud = False
-
-    for opilane, hinne in opilased:
-        if opilane.lower() == nimi.lower():
-            print(f"Õpilane: {opilane}, hinne: {hinne}")
-            leitud = True
-
-    if not leitud:
-        print("Õpilast ei leitud.")
+    if nimi in opilased:
+        print(nimi, "Hinded:", opilased[nimi])
+    else:
+        print("Õpilast ei leitud!")
 
 
-# 4. Kuvame hinnete statistika
 def statistika(opilased):
-    if not opilased:
-        print("Statistika kuvamiseks pole andmeid.")
+    koik_hinded = []
+
+    for hinded in opilased.values():
+        koik_hinded.extend(hinded)
+
+    if len(koik_hinded) == 0:
+        print("Hindeid pole!")
         return
 
-    hinded = [hinne for nimi, hinne in opilased]
+    keskmine = sum(koik_hinded) / len(koik_hinded)
 
-    keskmine = sum(hinded) / len(hinded)
-
-    print("\nHINNETE STATISTIKA")
-    print("------------------")
-    print(f"Hinnete keskmine: {keskmine:.2f}")
+    print("Hinnete keskmine:", round(keskmine, 2))
+    print("Hinnete esinemissagedus:")
 
     for hinne in range(1, 6):
-        arv = hinded.count(hinne)
-        print(f"Hinne {hinne}: {arv} korda")
+        arv = koik_hinded.count(hinne)
+        print(hinne, ":", arv, "korda")
 
 
-# 5. Salvestame aruande faili
 def salvesta_aruanne(opilased):
-    aruanne = []
-
-    aruanne.append("ÕPILASTE HINNETE ARUANNE")
-    aruanne.append("------------------------------")
-
-    for nimi, hinne in opilased:
-        aruanne.append(f"{nimi}: hinne {hinne}")
-
-    aruanne.append("")
-
-    if opilased:
-        hinded = [hinne for nimi, hinne in opilased]
-        keskmine = sum(hinded) / len(hinded)
-
-        aruanne.append(f"Hinnete keskmine: {keskmine:.2f}")
-        aruanne.append("")
-        aruanne.append("HINNETE ESINEMISSAGEDUS")
-
-        for hinne in range(1, 6):
-            arv = hinded.count(hinne)
-            aruanne.append(f"Hinne {hinne}: {arv} korda")
-    else:
-        aruanne.append("Õpilasi veel ei ole.")
-
     with open("aruanne.txt", "w", encoding="utf-8") as fail:
-        for rida in aruanne:
-            fail.write(rida + "\n")
+        for nimi, hinded in opilased.items():
+            keskmine = sum(hinded) / len(hinded)
+            fail.write(nimi + " - " +
+                       str(round(keskmine, 2)) + "\n")
 
-    print("Aruanne salvestati faili aruanne.txt!")
+        koik_hinded = []
+
+        for hinded in opilased.values():
+            koik_hinded.extend(hinded)
+
+        if koik_hinded:
+            keskmine = sum(koik_hinded) / len(koik_hinded)
+            fail.write("\nKlassi keskmine: " +
+                       str(round(keskmine, 2)))
+
+    print("Aruanne salvestatud faili aruanne.txt!")
 
 
-# PÕHIPROGRAMM
 opilased = loe_andmed()
 
 while True:
-    print("\n===== ÕPILASTE HINNETE HALDAMINE =====")
+    print("\n--- ÕPILASTE HINNETE HALDAMINE ---")
     print("1. Kuva kõik õpilased")
     print("2. Lisa uus õpilane ja hinne")
     print("3. Otsi õpilast")
@@ -139,7 +125,7 @@ while True:
     print("5. Salvesta aruanne faili")
     print("6. Lõpeta")
 
-    valik = input("Tee oma valik (1-6): ")
+    valik = input("Tee valik: ")
 
     if valik == "1":
         kuva_opilased(opilased)
@@ -157,8 +143,9 @@ while True:
         salvesta_aruanne(opilased)
 
     elif valik == "6":
-        print("Programm lõpetati. Head aega!")
+        salvesta_andmed(opilased)
+        print("Programm lõpetatud!")
         break
 
     else:
-        print("Vale valik! Palun vali 1-6.")
+        print("Vale valik! Proovi uuesti.")

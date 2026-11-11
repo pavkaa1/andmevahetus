@@ -1,37 +1,33 @@
+andmed = """Mari 5 4 5 3
+Jüri 3 4
+Anna 5 5 4 5 5
+Peeter 2 3 3
+Kati 4 5 5 4 5 5
+Martin 3 4 4"""
 
-# Loeme õpilaste andmed failist
-opilased = []
+keskmised = []
 
-with open("opilased.txt", "r", encoding="utf-8") as fail:
-    for rida in fail:
-        osad = rida.strip().split(";")
-
-        nimi = osad[0]
-        hinded = [int(x) for x in osad[1:]]
-
-        # Arvutame õpilase keskmise hinde
-        keskmine = sum(hinded) / len(hinded)
-
-        opilased.append((nimi, keskmine))
-
-
-# Arvutame kogu klassi keskmise
-klassi_keskmine = sum(
-    keskmine for nimi, keskmine in opilased
-) / len(opilased)
-
-
-# Salvestame tulemused faili
 with open("opilased_aruanne.txt", "w", encoding="utf-8") as fail:
 
-    fail.write("ÕPILASTE TULEMUSTE ARUANNE\n")
-    fail.write("------------------------------\n")
+    for rida in andmed.split("\n"):
+        osad = rida.split()
 
-    for nimi, keskmine in opilased:
-        fail.write(f"{nimi}: keskmine hinne {keskmine:.2f}\n")
+        nimi = osad[0]
+        hinded = []
 
-    fail.write("------------------------------\n")
-    fail.write(f"Klassi keskmine: {klassi_keskmine:.2f}\n")
+        for hinne in osad[1:]:
+            hinded.append(int(hinne))
 
+        keskmine = sum(hinded) / len(hinded)
 
-print("Aruanne salvestati faili opilased_aruanne.txt!")
+        keskmised.append(keskmine)
+
+        fail.write(nimi + " " + str(round(keskmine, 2)) + "\n")
+
+    klassi_keskmine = sum(keskmised) / len(keskmised)
+
+    fail.write("\nKlassi keskmine: " +
+               str(round(klassi_keskmine, 2)))
+
+print("Aruanne on salvestatud faili opilased_aruanne.txt")
+print("Klassi keskmine:", round(klassi_keskmine, 2))
